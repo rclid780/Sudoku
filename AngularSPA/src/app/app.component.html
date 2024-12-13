@@ -1,0 +1,17 @@
+<main class="main">
+  <div class="content">
+    <section class="content">
+      <h2>Sudoku!</h2>
+      <div>
+        <div class='inline-block-child'><app-board/></div>
+        <div class='inline-block-child'>&nbsp;</div>
+        <div class='inline-block-child'><app-board-update/></div>
+      </div>
+      <app-board-controls 
+        (checkEvent)="recieveCheckEvent()"
+        (newEvent)="recieveNewEvent()"
+        (highlightEvent)="recieveHighlightEvent($event)"/>
+    </section>
+  </div>
+</main>
+<router-outlet />

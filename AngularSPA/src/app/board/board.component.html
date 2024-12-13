@@ -1,0 +1,17 @@
+<ng-container>
+    <div *ngFor="let boardRow of boardData; let i = index">
+        <Input *ngFor="let boardCol of getRowSection(1); let j = index"
+            class="{{j==2 || j==5 ? 'verticalLine' : ''}}
+                {{i==2 || i==5 ? 'horizontalLine' : ''}}
+                {{puzzle[i][j]==0 ? '' : 'noEdit'}}
+                {{(highlight && boardData[i][j]!=0 && boardData[i][j]!=solution[i][j]) ? 'isError' : ''}}
+            "
+            style="text-align: center;"
+            type="text" maxlength="1" size="2"
+            (click)="clickMethod(i, j)"
+            attr.id="cell_{{i}}_{{j}}" 
+            value="{{boardData[i][j]==0 ? '-' : boardData[i][j]}}"
+            [readonly]="true"
+        >
+    </div>
+</ng-container>
