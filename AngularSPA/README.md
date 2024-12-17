@@ -4,13 +4,23 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
-To start a local development server, run:
+To start a local server, run:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Once the server is running, open your browser and navigate to `http://localhost:4200/`.<br>
+Click New Game to load the Sudoku puzzle.<br>
+Click on the square you want to update and select the number 1-9 on the right to update the square.<br>
+Click the '-' on the right to remove a value you think is incorrect<br>
+Squares with a light gray background can not be changed since they are part of the puzzle<br>
+Clicking check solution will start at the top left square (0,0) and move left to right, top to bottom checking squares
+check solution will stop and alert on the first incorrect of empty value. This will gives minimal hints.<br>
+Checking Highlight Errors will set the background of any incorrect square to red this intended for beginners learning Sudoku<br>
+
+Note: there is currently only one puzzle clicking New Game a second time relods the current puzzle from the start position<br>
+A C# backend service is being coded to generate and serve new puzzles and solutions to this SPA<br>
 
 ## Code scaffolding
 
