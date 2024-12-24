@@ -1,49 +1,12 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-
 namespace Sudoku;
 
 public class Generator
 {
-    //temp for debuggig remove this for a toString method...
-    public static void Print(int[,] grid)
-    {
-        //we are assuming a square properly formed sudoko grid
-        int N = grid.GetLength(0);
-
-        Console.WriteLine("{");
-        for (int i = 0; i < N; i++)
-        {
-            Console.Write("\t{");
-            for (int j = 0; j < N; j++)
-            {
-                int value = grid[i,j];
-                if(value == 0)
-                {
-                    Console.Write('_');
-                }
-                else
-                {
-                    Console.Write(value);
-                }
-                if(j < N - 1)
-                {
-                    Console.Write(", ");
-                }
-            }
-            Console.WriteLine("}");
-        }
-        Console.WriteLine("}");
-    }
-
-    // GridSize is the size of the 2D matrix
-    static readonly int GridSize = 9; //TODO allow more sizes
-
-    readonly int[][] solution = [];
+    private static readonly int GridSize = 9;
 
     delegate void SwapDelegate(int[,] puzzle, int first, int second);
 
-    public static int[,] Generate()
+    public static int[][] Generate()
     {
         int [,] solution = GenerateBase();
   
@@ -57,12 +20,10 @@ public class Generator
 
         int[,] puzzle = Mask(solution);
 
-        return puzzle;
+        
+        return ArrayManipulation.CreateJaggedArray(puzzle);
     }
 
-    //This fuction takes far far to long to complete the solving checks grind
-    //to a neat halt at 7 of 31 squares filled in
-    //perhaps having a more structured fill controlling for row,column and block
     private static int[,] GenerateBase()
     {
         int[,] blank = {
@@ -80,8 +41,8 @@ public class Generator
         Random random = new();
 
         /*
-            We can always fill one square in each row, column, block combination with any value
-            we know this wil be solvable so we won't do any checks.
+            We can always fill one square in each row, column, or block combination 
+            with any value we know this wil be solvable so we won't do any checks.
         */
         int rowOffSet = -1;
         for(int colBlock = 0; colBlock < 3; colBlock++)
@@ -103,8 +64,8 @@ public class Generator
         int fillCount = 9;
         while(fillCount < 31)
         {
-            int row = random.Next(0, 8);
-            int col = random.Next(0, 8);
+            int row = random.Next(0, GridSize - 1);
+            int col = random.Next(0, GridSize - 1);
             int value = random.Next(1, 9);
             if(Solver.IsSafe(blank, row, col, value))
             {
@@ -183,7 +144,7 @@ public class Generator
 
     private static void SwapColumns(int[,] puzzle, int firstColumn, int secondColumn)
     {
-        for (int row = 0; row < 9; row++)
+        for (int row = 0; row < GridSize; row++)
         {
             (puzzle[row,secondColumn], puzzle[row,firstColumn]) = (puzzle[row,firstColumn], puzzle[row,secondColumn]);
         }
@@ -194,24 +155,11 @@ public class Generator
         int maskCount = 0;
 
         Random random = new();
-        //first we will remove upto 15 random squares
-        //because it's random there a slight possiblity we remove less than 15
-        for (int i = 0; i < 15; i++)
-        {
-            int column = random.Next(0, 8);
-            int row = random.Next(0, 8);
-            if (puzzle[row, column] > 0)
-            {
-                maskCount++;
-                puzzle[row, column] = 0;
-            }
-        }
-
         //we can safely mask 50 squares but we have to make sure it's still solvable
         while (maskCount < 50)
         {
-            int column = random.Next(0, 9);
-            int row = random.Next(0, 9);
+            int column = random.Next(0, GridSize);
+            int row = random.Next(0, GridSize);
             if (puzzle[row, column] > 0)
             {
                 int temp = puzzle[row, column];
@@ -259,20 +207,5 @@ public class Generator
             6 => [(0, 2)],
             _ => [],//This can't happen but it makes the compiler happy
         };
-    }
-
-    private int[,] CreateSquareArray()
-    {
-        //This assumes a 9x9 sudoko array of arrays is passed in
-        int[,] ret = new int[9, 9];
-        for (int i = 0; i < 9; i++)
-        {
-            int[] array = solution[i];
-            for (int j = 0; j < 9; j++)
-            {
-                ret[i, j] = array[j];
-            }
-        }
-        return ret;
     }
 }

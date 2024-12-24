@@ -12,7 +12,19 @@ public static class Solver
         Sudoku solution (non-duplication across rows,
         columns, and boxes)
     */
-    public static List<int[,]> Solve(int[,] grid, int maxSolutions)
+    public static List<int[][]> Solve(int[][] puzzle, int maxSolutions)
+    {
+        int[,] grid = ArrayManipulation.CreateSquareArray(puzzle);
+        List<int[,]> solutionsTemp = Solve(grid, maxSolutions);
+        List<int[][]> solutions = [];
+        foreach(int[,] solution in solutionsTemp)
+        {
+            solutions.Add(ArrayManipulation.CreateJaggedArray(solution));
+        }
+        return solutions;
+    }
+
+    internal static List<int[,]> Solve(int[,] grid, int maxSolutions)
     {
         List<int[,]> solutions = [];
         Solve((int[,])grid.Clone(), 0, 0, maxSolutions, ref solutions);
