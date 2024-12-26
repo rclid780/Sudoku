@@ -99,9 +99,14 @@ public static class Solver
         }
         return false;
     }
+    public static bool IsSafe(int[][] puzzle, int row, int col, int num)
+    {
+        int[,] grid = ArrayManipulation.CreateSquareArray(puzzle);
+        return IsSafe(grid, row, col, num);
+    }
 
     // Check whether it will be legal to assign num to the given row, col
-    public static bool IsSafe(int[,] grid, int row, int col, int num)
+    internal static bool IsSafe(int[,] grid, int row, int col, int num)
     {
 
         // Check if we find the same num in the similar row , we return false
