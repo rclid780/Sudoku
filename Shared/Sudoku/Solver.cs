@@ -99,6 +99,7 @@ public static class Solver
         }
         return false;
     }
+    
     public static bool IsSafe(int[][] puzzle, int row, int col, int num)
     {
         int[,] grid = ArrayManipulation.CreateSquareArray(puzzle);
