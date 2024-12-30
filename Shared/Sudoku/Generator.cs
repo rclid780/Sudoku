@@ -39,38 +39,29 @@ public class Generator
         };
 
         Random random = new();
-
         /*
-            We can always fill one square in each row, column, or block combination 
-            with any value we know this wil be solvable so we won't do any checks.
-        */
-        int rowOffSet = -1;
-        for(int colBlock = 0; colBlock < 3; colBlock++)
-        {
-            rowOffSet++;
-            int Coloffset = 0;
-            for(int rowBlock = 0; rowBlock < 3; rowBlock++)
-            {
-                blank[rowBlock * 3 + rowOffSet, colBlock * 3 + Coloffset++] = random.Next(1,9);
-            }
-        }
-        /*
+            This needs to be less random on occasion the ransomness of this process can
+            cause a significant delay >30 sec
             for this part we have to 2 checks one:
             1) a quick validation that the puzzle is valid (but maybe not solvable)
             2) a solve check
             The validation check can't be skipped because the backtracking algo can take a very
             log time to verify there is no solution in cases tha validity check catches quickly
         */
-        int fillCount = 9;
+        int fillCount = 0;
         while(fillCount < 31)
         {
             int row = random.Next(0, GridSize - 1);
             int col = random.Next(0, GridSize - 1);
             int value = random.Next(1, 9);
+            if(blank[row, col] != 0)
+            {
+                //we already have a value for this square
+                continue;
+            }
             if(Solver.IsSafe(blank, row, col, value))
             {
                 blank[row, col] = value;
-                //We need to clone the array so that the solver doesn't fill it in
                 if(Solver.Solve(blank, 1).Count == 0)
                 {
                     blank[row, col] = 0;
