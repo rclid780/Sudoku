@@ -105,6 +105,7 @@ public class SolverTest
         bool expectTrue = Solver.IsSafe(input, 1, 1, 1);
         Assert.IsTrue(expectTrue);
         bool expectedFalse = Solver.IsSafe(input, 1, 1, 2);
+        Assert.IsFalse(expectedFalse);
     }
 
     [TestMethod]
@@ -124,5 +125,62 @@ public class SolverTest
         bool expectTrue = Solver.IsSafe(input, 1, 1, 1);
         Assert.IsTrue(expectTrue);
         bool expectedFalse = Solver.IsSafe(input, 1, 1, 2);
+        Assert.IsFalse(expectedFalse);
+    }
+
+    [TestMethod]
+    public void ValidateBoard()
+    {
+        int[][] input = [
+            [0, 0, 5, 0, 2, 0, 0, 1, 9],
+            [2, 0, 4, 0, 0, 3, 0, 0, 8],
+            [0, 0, 0, 0, 0, 0, 0, 4, 7],
+            [0, 0, 2, 5, 0, 0, 0, 3, 4],
+            [0, 8, 0, 0, 0, 6, 1, 7, 2],
+            [1, 0, 0, 0, 0, 0, 8, 0, 5],
+            [0, 0, 8, 4, 0, 9, 0, 0, 0],
+            [0, 0, 7, 0, 1, 0, 5, 0, 0],
+            [0, 0, 1, 0, 7, 0, 4, 0, 0]
+        ];
+        bool expectTrue = Solver.ValidateBoard(input);
+        Assert.IsTrue(expectTrue);
+        input[8][8] = 5;
+        bool expectedFalse = Solver.ValidateBoard(input);
+        Assert.IsFalse(expectedFalse);
+    }
+
+    [TestMethod]
+    public void VallidateBoardInternal()
+    {
+        int[,] input = {
+            {0, 0, 5, 0, 2, 0, 0, 1, 9},
+            {2, 0, 4, 0, 0, 3, 0, 0, 8},
+            {0, 0, 0, 0, 0, 0, 0, 4, 7},
+            {0, 0, 2, 5, 0, 0, 0, 3, 4},
+            {0, 8, 0, 0, 0, 6, 1, 7, 2},
+            {1, 0, 0, 0, 0, 0, 8, 0, 5},
+            {0, 0, 8, 4, 0, 9, 0, 0, 0},
+            {0, 0, 7, 0, 1, 0, 5, 0, 0},
+            {0, 0, 1, 0, 7, 0, 4, 0, 0}
+        };
+        bool expectTrue = Solver.ValidateBoard(input);
+        Assert.IsTrue(expectTrue);
+        
+        //check row duplicate
+        input[0, 1] = 5;
+        bool expectedFalse = Solver.ValidateBoard(input);
+        Assert.IsFalse(expectedFalse);
+
+        input[0, 1] = 0;
+        //check col duplicate
+        input[2, 0] = 2;
+        expectedFalse = Solver.ValidateBoard(input);
+        Assert.IsFalse(expectedFalse);
+
+        input[2, 0] = 0;
+        //check cage duplicate
+        input[8, 8] = 5;
+        expectedFalse = Solver.ValidateBoard(input);
+        Assert.IsFalse(expectedFalse);
     }
 }

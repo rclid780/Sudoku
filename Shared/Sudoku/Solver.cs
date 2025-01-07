@@ -3,7 +3,7 @@
 public static class Solver
 { 
     // GridSize is the size of the 2D matrix
-    static readonly int GridSize = 9; //TODO allow more sizes
+    static readonly int GridSize = 9;
 
     /*
         Takes a partially filled-in grid and attempts
@@ -26,6 +26,10 @@ public static class Solver
 
     internal static List<int[,]> Solve(int[,] grid, int maxSolutions)
     {
+        if(!ValidateBoard(grid))
+        {
+            return [];
+        }
         List<int[,]> solutions = [];
         Solve((int[,])grid.Clone(), 0, 0, maxSolutions, ref solutions);
         return solutions;
@@ -36,7 +40,9 @@ public static class Solver
         /*
             if we have reached the 8th
             row and 9th column (0 indexed matrix) ,
-            we are returning true to avoid further backtracking
+            we found a solution 
+            return true to avoid further backtracking
+            return false to backtrack and find another solution
         */
         if (row == GridSize - 1 && col == GridSize)
         {
@@ -141,6 +147,57 @@ public static class Solver
             }
         }
 
+        return true;
+    }
+
+    public static bool ValidateBoard(int[][] puzzle)
+    {
+        int[,] grid = ArrayManipulation.CreateSquareArray(puzzle);
+        return ValidateBoard(grid);
+    }
+
+    internal static bool ValidateBoard(int[,] grid)
+    {
+        //we can only reasonable nest loops like this because we know the grid is small
+        //a better solution would need to be used if the board was very large
+        // since O^3 scales very poorly ... 
+
+        //Check all rows are valid
+        for(int i = 0; i < GridSize; i++) //for each row, col, cage
+        {
+            for(int j = 0; j < grid.GetLength(1) - 1; j++)
+            {
+                for(int k = j + 1; k < grid.GetLength(1); k++)
+                {
+                    //we can ignore zero is a blank square not a "value"
+                    if(grid[i,j] != 0 && grid[i,j] == grid[i,k])
+                    {
+                        //a number appears twice in row[i] this is unsolveable
+                        return false;
+                    }
+                    if(grid[j,i] != 0 && grid[j,i] == grid[k,i])
+                    {
+                        //a number appears twice in col[i] this is unsolvable
+                        return false;
+                    }
+                    int RowOffset = i / 3 * 3;
+                    int Coloffset = i % 3 * 3;
+                    int square1row = j / 3;
+                    int square1col = j % 3;
+                    int square2row = k / 3;
+                    int square2col = k % 3;
+                    if(grid[square1row + RowOffset, square1col + Coloffset] != 0 
+                        && grid[square1row + RowOffset, square1col + Coloffset]
+                        == grid[square2row + RowOffset, square2col + Coloffset]
+                    )
+                    {
+                        //a number appears twice in a sub grid (cage) this is unsolvable
+                        return false;
+                    }
+                }
+            }
+        }
+        //no duplication detected probably solvable ...
         return true;
     }
 }
