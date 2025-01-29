@@ -1,0 +1,36 @@
+﻿@namespace Components
+
+@using Blazored.LocalStorage
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+
+<button @onclick="sendCheckEvent">Check Solution</button>
+<input type="checkbox" @oninput="sendHighlightChanged" @bind="isChecked"><label for="highlighting">Highlight Errors</label>
+<br><br>
+<button @onclick="sendNewEvent">New Game</button>
+
+@code {
+    [Parameter] public EventCallback sendNewGameEvent { get; set; }
+    [Parameter] public EventCallback sendCheckSolutionEvent { get; set; }
+    [Parameter] public EventCallback<bool> sendHighlightChange {get; set;}
+
+    bool isChecked = false;
+    protected override async Task OnInitializedAsync()
+    {
+        isChecked = await localStore.GetItemAsync<bool>("highlight");
+    }
+
+    void sendNewEvent()
+    {
+        sendNewGameEvent.InvokeAsync();
+    }
+
+    void sendCheckEvent()
+    {
+        sendCheckSolutionEvent.InvokeAsync();
+    }
+
+    void sendHighlightChanged(ChangeEventArgs e)
+    {
+        sendHighlightChange.InvokeAsync((bool)e.Value!);
+    }
+}

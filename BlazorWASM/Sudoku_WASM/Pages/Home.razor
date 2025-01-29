@@ -1,0 +1,39 @@
+﻿@page "/"
+
+<link href="/Components/Home.razor.css" rel="stylesheet" />
+
+<PageTitle>Sudoku Blazor</PageTitle>
+
+<h1>Sudoku</h1>
+
+<div>
+    <div style="display: inline-block"><Board @ref="board"></Board></div>
+
+    <div style="display: inline-block"><BoardUpdate ValueChangeEvent="ValueChanged"></BoardUpdate></div>
+</div>
+
+<BoardControls sendNewGameEvent="NewGame" sendCheckSolutionEvent="CheckEvent" sendHighlightChange="highlightChanged"></BoardControls>
+
+@code {
+    Board? board;
+
+    public void NewGame()
+    {
+        board?.NewGame();
+    }
+
+    public void CheckEvent()
+    {
+        board?.CheckEvent();
+    }
+
+    public void ValueChanged(int value)
+    {
+        board?.updateValue(value);
+    }
+
+    public void highlightChanged(bool highlighted)
+    {
+        board?.changeHighlight(highlighted);
+    }
+}

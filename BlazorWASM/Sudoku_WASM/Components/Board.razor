@@ -1,0 +1,196 @@
+﻿@namespace Components
+
+@using Blazored.LocalStorage
+@inject IJSRuntime JSRuntime
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+
+<link href="/Components/Board.razor.css" rel="stylesheet" />
+
+<table>
+    @for(int row = 0; row < boardData.Length; row++)
+    {
+        <tr>
+            @for(int col = 0; col < boardData[row].Length; col++)
+            {
+                var curRow = row;
+                var curCol = col;
+
+                <input width="2" size="1" style="text-align: center;" readonly type="text" 
+                value=@(boardData[row][col]==0 ? "-" : boardData[row][col])
+                class="
+                    @(row == 2 || row == 5 ? "horizontalLine" : "") 
+                    @(col == 2 || col == 5 ? "verticalLine" : "")
+                    @(puzzle[row][col]==0 ? "" : "noEdit")
+                    @(highlight && boardData[row][col]!=0 && boardData[row][col]!=solution[row][col] ? "isError" : "")
+                "
+                @onclick=@(e => {selectedRow = curRow; selectedCol = curCol;})
+                />
+            }
+        </tr>
+    }
+</table>
+
+@code {
+    int selectedRow = 0;
+    int selectedCol = 0;
+    bool highlight = false;
+    bool inGame = false;
+
+    int[][] boardData = [
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0]
+    ];
+
+    int[][] solution = [
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0]
+    ];
+
+    int[][] puzzle = [
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0]
+    ];
+
+    //used to cache data in local session so state isn't lost
+    string boardStorage = "000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    string solutionStorage = "000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    string puzzleStorage = "000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+    public async void UpdateLocalStorage()
+    {
+        System.Text.StringBuilder boardSB = new();
+        System.Text.StringBuilder solutionSB = new();
+        System.Text.StringBuilder puzzleSB = new();
+        for(int i = 0; i < 81; i++)
+        {
+            int row = i / 9;
+            int col = i % 9; 
+            boardSB.Append(boardData[row][col]);
+            solutionSB.Append(solution[row][col]);
+            puzzleSB.Append(puzzle[row][col]);
+        }
+        boardStorage = boardSB.ToString();
+        solutionStorage = solutionSB.ToString();
+        puzzleStorage = puzzleSB.ToString();
+        await localStore.SetItemAsync("board", boardStorage);
+        await localStore.SetItemAsync("solution", solutionStorage);
+        await localStore.SetItemAsync("puzzle", puzzleStorage);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string? storedBoard = await localStore.GetItemAsStringAsync("board");
+        string? storedSolution = await localStore.GetItemAsStringAsync("solution");
+        string? storedPuzzle = await localStore.GetItemAsStringAsync("puzzle");
+        highlight = await localStore.GetItemAsync<bool>("highlight");
+        inGame = await localStore.GetItemAsync<bool>("inGame");
+
+        if(storedBoard is not null && storedSolution is not null && storedPuzzle is not null)
+        {
+            boardStorage = storedBoard[1..^1];
+            solutionStorage = storedSolution[1..^1];
+            puzzleStorage = storedPuzzle[1..^1];
+            for(int i = 0; i < 81; i++)
+            {
+                int row = i / 9;
+                int col = i % 9; 
+                boardData[row][col] = int.Parse(boardStorage.Substring(i,1));
+                solution[row][col] = int.Parse(solutionStorage.Substring(i, 1));
+                puzzle[row][col] = int.Parse(puzzleStorage.Substring(i, 1));
+            }
+            StateHasChanged();
+        }
+    }
+
+    public async Task NewGame()
+    {
+        if(inGame)
+        {
+            if(!await Confirm("Start a new game?"))
+            {
+                return;
+            }
+        }
+        inGame = true;
+        await localStore.SetItemAsync<bool>("inGame", inGame);
+
+        boardData = Sudoku.Generator.Generate();
+
+        for (int row = 0; row < boardData.Length; row++)
+        {
+            puzzle[row] = (int[])boardData[row].Clone();
+        }
+
+        List<int[][]> solutions = Sudoku.Solver.Solve(boardData, 1);
+        solution = solutions[0];
+
+        UpdateLocalStorage();
+        StateHasChanged();
+    }
+
+    public void updateValue(int newValue)
+    {
+        if(puzzle[selectedRow][selectedCol] == 0)
+        {
+            boardData[selectedRow][selectedCol] = newValue;
+        }
+
+        UpdateLocalStorage();
+        StateHasChanged();
+    }
+
+    public void CheckEvent()
+    {
+        for(int row = 0; row < boardData.Length; row++)
+        {
+            for(int col = 0; col < boardData.Length; col++)
+            {
+                if(solution[row][col] != boardData[row][col])
+                {
+                    Console.WriteLine($"at ({row},{col})");
+                    Task.Run(() => Alert($"Solution is incorrect at ({row}, {col})"));
+                    return;
+                }
+            }
+        }
+        Task.Run(() => Alert("Congrats! The solution is correct!"));
+    }
+
+    public void changeHighlight(bool highlighted)
+    {
+        highlight = highlighted;
+        localStore.SetItemAsync<bool>("highlight", highlight);
+        StateHasChanged();
+    }
+
+    private async Task Alert(string message)
+    {
+        await JSRuntime.InvokeAsync<object>("alert", message);
+    }
+
+    private ValueTask<bool> Confirm(string message)
+    {
+        return JSRuntime.InvokeAsync<bool>("confirm", message);
+    }
+}

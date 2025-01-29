@@ -1,0 +1,25 @@
+﻿@namespace Components
+
+<button @onclick=@(() => submitHandler(1))>1</button>
+<button @onclick=@(() => submitHandler(2))>2</button>
+<button @onclick=@(() => submitHandler(3))>3</button>
+<br>
+<button @onclick=@(() => submitHandler(4))>4</button>
+<button @onclick=@(() => submitHandler(5))>5</button>
+<button @onclick=@(() => submitHandler(6))>6</button>
+<br>
+<button @onclick=@(() => submitHandler(7))>7</button>
+<button @onclick=@(() => submitHandler(8))>8</button>
+<button @onclick=@(() => submitHandler(9))>9</button>
+<br>
+<button @onclick=@(() => submitHandler(0))>-</button>
+
+
+@code {
+    [Parameter] public EventCallback<int> ValueChangeEvent { get; set; }
+
+    void submitHandler(int newValue)
+    {
+        ValueChangeEvent.InvokeAsync(newValue);
+    }
+}

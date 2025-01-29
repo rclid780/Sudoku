@@ -1,0 +1,15 @@
+.verticalLine {
+    border-right: 5px solid #000000;
+}
+
+.horizontalLine {
+    border-bottom: 5px solid #000000;
+}
+
+.noEdit {
+    background-color: #F0F0F0;
+}
+
+.isError {
+    background-color: #ff6347;
+}
